@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>QUnit Example</title>
+    <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.14.0.css">
+</head>
+<body>
+    <div id='qunit'></div>
+    <div id='qunit-fixture'></div>
+    <script src='http://code.jquery.com/qunit/qunit-1.14.0.js'></script>
+
+    <script>
+
+        QUnit.module("jQYUI suite", {
+            setup: function() {
+                // prepare something for all following tests
+            },
+            teardown: function() {
+                // clean up after each test
+            }
+        });
+
+        QUnit.test('test 1', function(assert) {
+            // arrange, act, assert
+            assert.ok(1 === 1, 'Passed!');
+        });
+
+    </script>
+</body>
+</html>
