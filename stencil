@@ -1,0 +1,18 @@
+<!doctype html>
+<html language="en-US">
+    <head>
+        <title>HTML page</title>
+        <meta charset="utf-8">
+        <script src="https://yui-s.yahooapis.com/3.17.0/build/yui/yui-min.js"></script>
+        <script src="https://s.yimg.com/zz/combo?os/mit/td/stencil-2.0.8/stencil/stencil-min.js&os/mit/td/stencil-2.0.8/stencil-base/stencil-base-min.js"></script>
+        <script src="https://s.yimg.com/os/mit/td/stencil-2.0.8/stencil-lightbox/stencil-lightbox-min.js"></script>
+        <link rel="stylesheet" href="https://s.yimg.com/os/stencil/2.0.8/styles.css" />
+        <script>
+            YUI().use('stencil-lightbox', function (Y) {});
+        </script>
+    </head>
+    <body>
+        <button data-plugin="lightbox" data-lightbox='{"target":"#lightboxContainer","click":{"toggle":{}}}'>Click</button>
+        <div id="lightboxContainer" class="Modal Modal-off Dn">lightbox</div>
+    </body>
+</html>
