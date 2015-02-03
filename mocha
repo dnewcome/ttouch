@@ -1,0 +1,244 @@
+/*jshint node:true, browser:true, unused:vars*/
+/*global describe, it, before, after, beforeEach, afterEach*/
+
+var assert = require('chai').assert,
+    mockery = require('mockery'),
+    controller,
+    req,
+    res;
+
+describe('#index controller actions', function () {
+    'use strict';
+    before(function () {
+        mockStore = require('td-api').mock.store();
+        mockery.registerMock('td-stores-highlander', { contentList: mockStore, curveballAds: mockAdsStore });
+        mockery.enable({
+            useCleanCache: true,
+            warnOnUnregistered: false
+        });
+        controller = require('../../../controllers/index.js');
+    });
+    beforeEach(function () {
+        req = {
+            get: function(key) {
+                return key;
+            },
+            query: null,
+            context: {
+                lang: "en-US",
+                region: "US",
+                device: "smartphone"
+            },
+            header: function(key) {
+                return req.mockReqConfig.header[key];
+            },
+            mockReqConfig: {
+                header: {
+                    "host": "yahoo.com",
+                    "x-orig-host": "yahoo.com",
+                    "x-original-host": "yahoo.com",
+                    "x-yahoo-request-url": "yahoo.com"
+                },
+                template: {
+                    main: "main",
+                    ads: "ads_story"
+                },
+                contentId: null,
+                bootstrap: {
+                    models: {},
+                    templates: {},
+                    views: {}
+                },
+                model: {
+                    swipe: {
+                        dataFetch: {
+                            NUM_PREFETCH_ITEMS: 20,
+                            NUM_RENDER_ITEMS: 20,
+                            STALE_DATA_FETCH: 1800
+                        }
+                    }
+                },
+                "ui": {
+                    "comments": false,
+                    "footer": true,
+                    "inlineView": false,
+                    "lead": { "minWidth": 600, "resizedWidth": 300 },
+                    "parallax": false,
+                    "renderAdsOnly": false,
+                    "sticker": false,
+                    "stickerTarget": "",
+                    "summaryView": false,
+                    "swipe": false,
+                    "swipeHint": 5,
+                    "enableCommentsProxy": true,
+                    "pcsExclusions": false,
+                    "videoPlayer": {
+                        "version": "nextgen",
+                        "env": "prod"
+                    }
+                },
+                "ads": {
+                    "curveball": {
+                        "sectionId": 4250754,
+                        "positionThreshold": 200,
+                        "enabled": 0,
+                        "adChoicesUrl": "adChoicesUrl"
+                    },
+                    "displayAds": {
+                        "config": {
+                            "LDRP-9": { "w": "768", "h": "1" },
+                            "LDRB-9": { "w": "728", "h": "90" },
+                            "LREC-9": { "w": "300", "h": "250" },
+                            "WPS-9" : { "w": "320", "h": "50" },
+                            "WP-9"  : { "w": "320", "h": "50" }
+                        },
+                        "enabled": 0,
+                        "positions": {
+                            "aboveFold": [],
+                            "belowFold": []
+                        }
+                    },
+                    "YVAP": {
+                        "accountId": "904",
+                        "playContext": "default",
+                        "spaceId": null
+                    },
+                    "displayAdsFP": {
+                        "enabled": 0
+                    }
+                },
+                assets: {
+                    css: "index.min",
+                    js: {
+                        twitter: "https://platform.twitter.com/widgets.js",
+                        embed: "click-capture-min",
+                        videoplayer: "https://yep.video.yahoo.com/js/3/videoplayer-min.js"
+                    }
+                }
+            },
+            config: function(key) {
+                if (!key) { return req.mockReqConfig; }
+                return req.mockReqConfig[key];
+            },
+            isSsl: true,
+            getBucket: function () {
+                return '822';
+            },
+            isEnabled: function () {
+                return true;
+            },
+            param: function (key) {
+                return req.mockReqConfig[key] || null;
+            }
+        };
+        res = {
+            render: function (template, results) {},
+            setRenderOptions: function () {},
+            set: function() {},
+            write: function(content) {
+                res.writeContent = content;
+            },
+            addEmbed: function(key) {
+                return '';
+            },
+            bootstrap: function() {},
+            exposeModelData: function() {},
+            exposeViewConfig: function(key) {
+                res.mockConfig = key;
+            },
+            models: {
+                viewer: {
+                    config: {}
+                },
+                ads: {
+                    config: {}
+                }
+            }
+        };
+    });
+    afterEach(function() {
+        req = {};
+        res = {};
+    });
+    after(function() {
+        mockery.disable();
+        mockery.deregisterAll();
+    });
+
+    describe('#controller logic', function () {
+        it ("should return viewer template via server-side rendering", function () {
+            res.render = function (template, results) {
+                assert.isNotNull(template, "template");
+                assert.equal(template, "main");
+            };
+            controller(req, res);
+        });
+
+        describe('client side data expose', function () {
+            it ("use fireball player in HL", function () {
+                controller(req, res);
+                assert.equal(res.mockConfig.main.ui.videoPlayer.version, 'nextgen');
+                assert.equal(res.mockConfig.main.ui.videoPlayer.env, 'prod');
+            });
+            it ("swipe feature flag should be set correctly", function () {
+                req.mockReqConfig.ui.swipe = "1";
+                res.render = function (template, results) {
+                    assert.equal(results.ui.swipe, "1");
+                };
+                controller(req, res);
+            });
+            it ("content_id being pass correctly ", function () {
+                req.mockReqConfig.content_id = "MOCKCONTENTID";
+                controller(req, res);
+                assert.equal(res.mockConfig.main.content_id, "MOCKCONTENTID");
+            });
+        });
+
+        it ("render from server side when contentId is pass - incorrect return format", function () {
+            res.render = function (template, results) {
+                assert.equal(template, 'main');
+            };
+            mockStore.setMock({
+                result: "I AM WRONG MOCK DATA"
+            });
+            req.mockReqConfig.contentId = "CONTENTID";
+            controller(req, res);
+        });
+        it ("render from server side when contentId is pass", function () {
+            res.render = function (template, results) {
+                assert.deepEqual(results, {
+                    data: {
+                        items: [{},{},{}]
+                    },
+                    rendered: true,
+                    ui: req.mockReqConfig.ui,
+                    adChoicesUrl: 'adChoicesUrl'
+                });
+                assert.isNotNull(template, 'template');
+            };
+            mockStore.setMock({
+                result: {
+                    items: [{},{},{}]
+                }
+            });
+            req.mockReqConfig.contentId = "CONTENTID";
+            controller(req, res);
+        });
+        it ("render from server side when pageContent is pass", function () {
+            res.render = function (template, results) {
+                assert.deepEqual(results, {data: {value: "MOCK"}, ui: req.mockReqConfig.ui, rendered: true, adChoicesUrl: 'adChoicesUrl'});
+                assert.equal(template, 'main');
+            };
+            req.mockReqConfig.pageContent = {value: "MOCK"};
+            controller(req, res);
+        });
+        it ("render from clide side when content_id pass", function () {
+            res.render = function (template, results) {
+                assert.deepEqual(results, {data: null, rendered: false, ui: req.mockReqConfig.ui, adChoicesUrl: 'adChoicesUrl'});
+                assert.equal(template, 'main');
+            };
+            req.mockReqConfig.content_id = "CONTENTID";
+            controller(req, res);
+        });
+    });
+});
