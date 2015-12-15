@@ -1,8 +1,7 @@
-/** @jsx React.DOM */
 var people = [
-    {name: 'Dan'},
-    {name: 'Elaine'},
-    {name: 'Chris'}
+    {name: 'Dan', key: '1'},
+    {name: 'Elaine', key: '2'},
+    {name: 'Chris', key: '3'}
 ];
 
 var Hello = React.createClass({
@@ -19,7 +18,7 @@ var Hello = React.createClass({
         return (
             <ul>
                 {this.state.people.map(function(person) {
-                    return <li onClick={that.deletePerson.bind(null, person)}>{person.name}</li>;}
+                    return <li key={person.key} onClick={that.deletePerson.bind(null, person)}>{person.name}</li>;}
                 )}
             </ul>
         );
@@ -27,4 +26,3 @@ var Hello = React.createClass({
 });
 
 React.render(<Hello people={people}></Hello>, document.body);
-
