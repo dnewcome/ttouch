@@ -1,0 +1,25 @@
+{
+  "name": "foo.react",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "babel": {
+    "plugins": [
+      [
+        "transform-react-jsx",
+        {
+          "pragma": "dom"
+        }
+      ]
+    ]
+  },
+  "devDependencies": {
+    "babel-cli": "~6.3.17",
+    "babel-plugin-transform-react-jsx": "^6.3.13"
+  }
+}
