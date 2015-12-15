@@ -1,0 +1,7 @@
+# installing
+
+run 
+
+```
+$ npm install
+```
