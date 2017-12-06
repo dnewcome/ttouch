@@ -3,5 +3,5 @@
 if [ -z $1 ] ; then
 	echo 'usage: ttouch <extension> <name>'
 else 
-	cp -r ~/.templates/$1 ./$2.$1
+	cp -r ~/.ttemplates/$1 ./$2.$1
 fi
